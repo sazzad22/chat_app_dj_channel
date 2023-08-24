@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat app 2</title>
+</head>
+<body>
+
+    <textarea id="chat-log" cols="30" rows="10"></textarea><br>
+    <input type="text" id="chat-message-input"><br>
+    <input type="button" value="Send" id = "chat-message-submit">
+
+    <script>
+        var ws = new WebSocket('ws://localhost:7000/ws/sc/')
+        ws.onopen = function(){
+            console.log('Websocket Connetion open...')
+            ws.send('hello from index2.html')
+            // this msg is showed by websocket_receive
+        }
+        // this is executed only when a message is received from ws server
+        ws.onmessage = function(event){
+            console.log('message recieved from server', event);
+            console.log('type of message Received from server...',typeof(event.data));
+            const data = JSON.parse(event.data);
+            console.log('Parsed Data...',data)
+            console.log('Type of Parsed Data...',typeof(data))
+            console.log('Actual message...',data.msg)
+            document.querySelector('#chat-log').value += (data.msg + '\n')
+        }
+        ws.onclose = function(event){
+            console.log('Web socket closed', event)
+        }
+        document.getElementById('chat-message-submit').onclick = function(event){
+            const messageInputDom = document.getElementById('chat-message-input')
+            const message = messageInputDom.value
+            // send the message to ws server
+            ws.send(JSON.stringify({
+                'msg':message
+            }))
+            messageInputDom.value = ''
+        }
+    </script>
+</body>
+</html>
