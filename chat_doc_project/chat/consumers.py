@@ -53,7 +53,7 @@ class MySyncConsumer(AsyncConsumer):
         # adding this instance channel to a group called programmers
         # here we are adding this channel to the group on connecting to websocket server.
         await self.channel_layer.group_add('programmers',self.channel_name)
-        self.send({
+        await self.send({
             'type':'websocket.accept'
         })
         
@@ -80,10 +80,10 @@ class MySyncConsumer(AsyncConsumer):
         raise StopConsumer()
     
     
-    def chat_message(self,event):
+    async def chat_message(self,event):
         print('event..',event)
         #  sending message to client
-        self.send({
+        await self.send({
             'type':'websocket.send',
             'text': event['message']
         })
