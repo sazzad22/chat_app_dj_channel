@@ -58,8 +58,19 @@
     <textarea id="chat-log" cols="30" rows="10"></textarea><br>
     <input type="text" id="chat-message-input"><br>
     <input type="button" value="Send" id = "chat-message-submit">
+    {{group_name|json_script:"group-name"}}
+    <!-- {{group_name}} -->
     <script>
-        var ws = new WebSocket('ws://localhost:7000/ws/sc/')
+        const groupName = JSON.parse(document.getElementById('group-name').textContent)
+        console.log(groupName)
+        // var ws = new WebSocket('ws://localhost:7000/ws/sc/')
+        var ws = WebSocket(
+            'ws://'
+            + windows.location.host 
+            + '/ws/sc/' 
+            + groupName 
+            + '/'
+        )
         ws.onopen = function(){
             console.log('Websocket Connetion open...')
             ws.send('hello from index2.html')
