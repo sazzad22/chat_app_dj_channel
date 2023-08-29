@@ -5,5 +5,5 @@ from . import consumers
 
 websocket_urlpatterns = [
     re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
-    path('ws/sc/',consumers.MySyncConsumer.as_asgi()),
+    path('ws/sc/<str:group_name>/',consumers.MySyncConsumer.as_asgi()),
 ]

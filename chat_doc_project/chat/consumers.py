@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.consumer import SyncConsumer,AsyncConsumer
 from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import StopConsumer
+from .models import Group,Chat
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -52,18 +53,24 @@ class MySyncConsumer(AsyncConsumer):
         # for every instance of this consumer there would be a unique channel layer and channel name
         # adding this instance channel to a group called programmers
         # here we are adding this channel to the group on connecting to websocket server.
-        await self.channel_layer.group_add('programmers',self.channel_name)
+        print("self.scope['url_route']['kwargs']['group_name']",self.scope['url_route']['kwargs']['group_name'])
+        self.group_name = self.scope['url_route']['kwargs']['group_name']
+        await self.channel_layer.group_add(self.group_name,self.channel_name)
         await self.send({
             'type':'websocket.accept'
         })
         
         
-        
+    # this is getting called because of the ws.send() on the front end
     async def websocket_receive(self,event):
         print('Websocket received from client...',event)
         print('Type of Message Received from the client..','type(event) ',type(event),"type(event['text'])",type(event['text']))
+        # find group object
+        group = Group.objects.get(name = self.group_name)
+        # create new chat object
+        
         # send message to the group
-        await self.channel_layer.group_send('programmers',{
+        await self.channel_layer.group_send(self.group_name,{
             'type':'chat.message',
             'message':event['text']
         })
@@ -74,7 +81,7 @@ class MySyncConsumer(AsyncConsumer):
         print('\nchannel layer...',self.channel_layer)
         print('\nchannel name...',self.channel_name)
         await self.channel_layer.group_discard(
-            'programmers',
+            self.group_name,
             self.channel_name
         )
         raise StopConsumer()

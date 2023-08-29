@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            margin: 0;
+            /* margin: auto; */
             padding: 0;
         }
 
@@ -17,12 +17,12 @@
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 5px 10px 5px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
         }
 
         #chat-log {
-            width: 100%;
+            width: 80%;
             height: 200px;
             resize: none;
             border: 1px solid #ccc;
@@ -30,7 +30,7 @@
         }
 
         #chat-message-input {
-            width: 100%;
+            width: 80%;
             padding: 10px;
             margin-top: 10px;
             border: 1px solid #ccc;
@@ -41,32 +41,50 @@
             width: 100%;
             padding: 10px;
             margin-top: 10px;
-            background-color: #007BFF;
+            background-color: #45a049;
             color: #fff;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
+
         }
 
         #chat-message-submit:hover {
-            background-color: #0056b3;
+            background-color: #457ba0;
+        }
+        #group-name {
+            color: #3b66f5;
+            transition: color 0.3s ease;
+        }
+        #chat-room-title {
+            text-align: center;
+            color: #3b66f5;
         }
     </style>
 </head>
 <body>
+    <h1 id = 'chat-room-title'>Chat room</h1>
+    <div id = 'container'>
+        <h2 id = "group-name">Group Name : {{group_name}}</h2>
+        <textarea id="chat-log" cols="30" rows="10">
+            {% for chat in chats %}
+             {{chat.content}}
+            {% endfor %}
+        </textarea><br>
+        <input type="text" id="chat-message-input"><br>
+        <input type="button" value="Send" id = "chat-message-submit">
 
-    <textarea id="chat-log" cols="30" rows="10"></textarea><br>
-    <input type="text" id="chat-message-input"><br>
-    <input type="button" value="Send" id = "chat-message-submit">
-    {{group_name|json_script:"group-name"}}
+    </div>
+    {{group_name|json_script:"groupName"}}
     <!-- {{group_name}} -->
     <script>
-        const groupName = JSON.parse(document.getElementById('group-name').textContent)
-        console.log(groupName)
+        console.log(document.getElementById('groupName'));
+        const groupName = JSON.parse(document.getElementById('groupName').textContent)
         // var ws = new WebSocket('ws://localhost:7000/ws/sc/')
-        var ws = WebSocket(
+        var ws = new WebSocket(
             'ws://'
-            + windows.location.host 
+            + window.location.host 
             + '/ws/sc/' 
             + groupName 
             + '/'
@@ -89,6 +107,14 @@
         ws.onclose = function(event){
             console.log('Web socket closed', event)
         }
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
         document.getElementById('chat-message-submit').onclick = function(event){
             const messageInputDom = document.getElementById('chat-message-input')
             const message = messageInputDom.value
