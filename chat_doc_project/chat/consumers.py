@@ -5,6 +5,7 @@ from channels.consumer import SyncConsumer,AsyncConsumer
 from channels.generic.websocket import WebsocketConsumer
 from channels.exceptions import StopConsumer
 from .models import Group,Chat
+from channels.db import database_sync_to_async
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
@@ -64,18 +65,29 @@ class MySyncConsumer(AsyncConsumer):
     # this is getting called because of the ws.send() on the front end
     async def websocket_receive(self,event):
         print('Websocket received from client...',event)
-        print('Type of Message Received from the client..','type(event) ',type(event),"type(event['text'])",type(event['text']))
+        print('Type of Message Received from the client..','type(event) ',type(event),"type(event['text'])",type(event['text']),event['text'])
+        self.data = json.loads(event['text'])
         # find group object
-        group = Group.objects.get(name = self.group_name)
+        # group = Group.objects.get(name = self.group_name)
         # create new chat object
-        
+        # chat = Chat(
+        #     content = data['msg'],
+        #     group = group
+        # )
+        # chat.save()
         # send message to the group
+        await self.get_group_and_save_chat()
         await self.channel_layer.group_send(self.group_name,{
             'type':'chat.message',
             'message':event['text']
         })
-        
-        
+    @database_sync_to_async
+    def get_group_and_save_chat(self):
+        group = Group.objects.get(
+            name = self.group_name  
+        )
+        Chat.objects.create(content = self.data.get('msg'),group = group)
+
     async def websocket_disconnect(self,event):
         print('Websocket disconnected...',event)
         print('\nchannel layer...',self.channel_layer)

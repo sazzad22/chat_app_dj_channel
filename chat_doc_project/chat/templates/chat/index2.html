@@ -21,13 +21,13 @@
             border-radius: 5px;
         }
 
-        #chat-log {
+        /* #chat-log {
             width: 80%;
             height: 200px;
             resize: none;
             border: 1px solid #ccc;
             padding: 10px;
-        }
+        } */
 
         #chat-message-input {
             width: 80%;
@@ -67,9 +67,9 @@
     <h1 id = 'chat-room-title'>Chat room</h1>
     <div id = 'container'>
         <h2 id = "group-name">Group Name : {{group_name}}</h2>
-        <textarea id="chat-log" cols="30" rows="10">
+        <textarea id="chat-log">
             {% for chat in chats %}
-             {{chat.content}}
+                {{ chat.content }}
             {% endfor %}
         </textarea><br>
         <input type="text" id="chat-message-input"><br>
@@ -91,7 +91,7 @@
         )
         ws.onopen = function(){
             console.log('Websocket Connetion open...')
-            ws.send('hello from index2.html')
+            // ws.send('hello from index2.html')
             // this msg is showed by websocket_receive
         }
         // this is executed only when a message is received from ws server
@@ -102,6 +102,7 @@
             console.log('Parsed Data...',data)
             console.log('Type of Parsed Data...',typeof(data))
             console.log('Actual message...',data.msg)
+            console.log(document.querySelector('#chat-log').value)
             document.querySelector('#chat-log').value += (data.msg + '\n')
         }
         ws.onclose = function(event){
